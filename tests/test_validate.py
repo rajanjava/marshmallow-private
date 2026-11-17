@@ -882,6 +882,21 @@ def test_contains_only_unhashable_types():
         validate.ContainsOnly([])([1])
 
 
+def test_contains_only_unhashable_input_with_set_choices():
+    validator = validate.ContainsOnly({"read", "write"})
+    with pytest.raises(ValidationError):
+        validator([{}])
+    with pytest.raises(ValidationError):
+        validator([["read"]])
+
+
+def test_contains_none_of_unhashable_input_with_set_iterable():
+    validator = validate.ContainsNoneOf({"admin", "root"})
+    assert validator([{}]) == [{}]
+    assert validator([["admin"]]) == [["admin"]]
+
+
+
 def test_containsonly_in_tuple():
     assert validate.ContainsOnly(())(()) == ()
     assert validate.ContainsOnly((1, 2, 3))((1,)) == (1,)
