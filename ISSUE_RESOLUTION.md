@@ -8,7 +8,7 @@
 
 ---
 
-## 2. Root Cause Analysis
+## 2. Problem Description & Root Cause Analysis
 In `OneOf.__call__`, membership checking catches `TypeError` when checking unhashable objects against set choices:
 ```python
 try:
@@ -51,6 +51,11 @@ FAILED tests/test_validate.py::test_contains_none_of_unhashable_input_with_set_i
 ```
 
 ---
+
+## Solution Approach
+1. **Avoid Unconditional Set Construction on Input:** `ContainsOnly` and `ContainsNoneOf` used set operations (`set(value)`) for fast membership checks, which immediately raised `TypeError: unhashable type` when validating lists of dicts or nested lists.
+2. **Fast-Path with Safe Fallback:** Retain `O(1)` set-based checks for hashable inputs, and catch `TypeError` (or check hashability) to fall back gracefully to equality-based iteration when inputs contain unhashable elements like `dict` or `list`.
+3. **TDD & Regression Safety:** Added `test_contains_only_unhashable_input_with_set_choices` in `tests/test_validate.py` verifying both valid and invalid unhashable sequences without degrading performance for hashable inputs.
 
 ## 4. Implementation Diff
 ```diff
